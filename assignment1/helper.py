@@ -46,12 +46,20 @@ def appendBias (feature_matrix = []):
     feature_bias = numpy.ones ((1, feature_matrix.shape [1]))
     return numpy.append (feature_bias, feature_matrix, axis = 0)
 
-def evaluateTheta (test_feature_set, test_target_set, theta):
+def evaluateTheta (test_feature_set, test_target_set, theta, mean, std):
 
-    predicted_target = theta.transpose().dot (test_feature_set)
-    return math.sqrt(((test_target_set - predicted_target[0]) ** 2).mean ())
+    predicted_target = theta.transpose().dot (test_feature_set) * std + mean
+    test_target_set_denorm = test_target_set * std + mean
 
-def gradientDescent (training_feature_set, training_target_set, test_feature_set, test_target_set, alpha = 0.1, regularization = 0, max_steps = 30):
+    if len(predicted_target.shape) > 1:
+        predicted_target = predicted_target [0]
+
+    print (test_target_set_denorm)
+    print (predicted_target)
+
+    return math.sqrt(((test_target_set_denorm - predicted_target) ** 2).mean ())
+
+def gradientDescent (training_feature_set, training_target_set, test_feature_set, test_target_set, training_params = [], alpha = 0.1, regularization = 0, max_steps = 30):
 
     feature_count = training_feature_set.shape [0]
     sample_count = training_feature_set.shape [1]
@@ -63,13 +71,16 @@ def gradientDescent (training_feature_set, training_target_set, test_feature_set
     train_error = []
     test_error = []
 
+    mean = training_params [2] [0]
+    std = training_params [3] [0]
+
     predicted_target = thetas.transpose().dot (training_feature_set)
-    rms = math.sqrt(((training_target_set - predicted_target[0]) ** 2).mean ())
+    rms = math.sqrt((((training_target_set - predicted_target[0]) * std) ** 2).mean ())
     print (rms)
 
     train_error.append (rms)
 
-    test_error.append (evaluateTheta (test_feature_set, test_target_set, thetas))
+    test_error.append (evaluateTheta (test_feature_set, test_target_set, thetas, mean, std))
 
     while step < max_steps:
 
@@ -84,11 +95,11 @@ def gradientDescent (training_feature_set, training_target_set, test_feature_set
 
         predicted_target = thetas.transpose().dot (training_feature_set)
 
-        rms = math.sqrt (((training_target_set - predicted_target [0]) ** 2).mean ())
+        rms = math.sqrt ((((training_target_set - predicted_target [0]) * std) ** 2).mean ())
         print (rms)
 
         train_error.append (rms)
-        test_error.append (evaluateTheta (test_feature_set, test_target_set, thetas))
+        test_error.append (evaluateTheta (test_feature_set, test_target_set, thetas, mean, std))
 
         step += 1
 
@@ -111,7 +122,7 @@ def linearRegression (filename, training_feature_set, training_target_set, test_
         # Normalize columns to obtain better and faster results - use (X - u) / sigma, where u = mean and sigma = std. dev.
         lr_training_feature_set, lr_feat_means, lr_feat_stds = normalize (training_feature_set)
         lr_training_target_set, lr_target_means, lr_target_stds = normalize (training_target_set)
-       
+
         lr_test_feature_set, lr_test_feat_means, lr_test_feat_stds = normalize (test_feature_set, means = lr_feat_means, stds = lr_feat_stds)
         lr_test_target_set, lr_test_target_means, lr_test_target_stds = normalize (test_target_set, means = lr_target_means, stds = lr_target_stds)
 
@@ -123,6 +134,7 @@ def linearRegression (filename, training_feature_set, training_target_set, test_
         # First version of the LR - simple model
         theta_lr, train_error, test_error = gradientDescent (lr_training_feature_set, lr_training_target_set, \
                                                              lr_test_feature_set, lr_test_target_set, \
+                                                             training_params = [lr_feat_means, lr_feat_stds, lr_target_means, lr_target_stds], \
                                                              alpha = 0.25, regularization = regularization, \
                                                              max_steps = steps)
 
@@ -144,7 +156,7 @@ def normalEquation (filename, training_feature_set, training_target_set, test_fe
         norm_test_errors = []
         norm_theta_errors = []
 
-        for feat_size in range (500, training_feature_set.shape [1], 1000):
+        for feat_size in range (500, training_feature_set.shape [1], 2500):
 
             # Choose a subset of the features
             indexes = range (feat_size)
@@ -164,17 +176,39 @@ def normalEquation (filename, training_feature_set, training_target_set, test_fe
             stp = inv.dot (norm_training_feature_set)
             theta_norm = stp.dot (norm_training_target_set)
 
+            mean = norm_target_means [0]
+            std = norm_target_stds [0]
+
             norm_thetas.append (theta_norm)
             norm_sizes.append (feat_size)
-            norm_train_errors.append (evaluateTheta (norm_training_feature_set, norm_training_target_set, theta_norm))
-            norm_test_errors.append (evaluateTheta (norm_test_feature_set, norm_test_target_set, theta_norm))
-            norm_theta_errors.append (math.sqrt(((theta_norm - lr_theta) ** 2).mean ())) 
+            norm_train_errors.append (evaluateTheta (norm_training_feature_set, norm_training_target_set, theta_norm, mean, std))
+            norm_test_errors.append (evaluateTheta (norm_test_feature_set, norm_test_target_set, theta_norm, mean, std))
+            norm_theta_errors.append (math.sqrt(((theta_norm - lr_theta) ** 2).mean ()))
 
             print ("RMS between LR and norm. = " + str (math.sqrt(((theta_norm - lr_theta) ** 2).mean ())))
-            print ("Training RMS = " + str (evaluateTheta (norm_training_feature_set, norm_training_target_set, theta_norm)))
-            print ("Testing RMS = " + str (evaluateTheta (norm_test_feature_set, norm_test_target_set, theta_norm)))
+            print ("Training RMS = " + str (evaluateTheta (norm_training_feature_set, norm_training_target_set, theta_norm, mean, std)))
+            print ("Testing RMS = " + str (evaluateTheta (norm_test_feature_set, norm_test_target_set, theta_norm, mean, std)))
 
         norm_results = [norm_thetas, norm_sizes, norm_train_errors, norm_test_errors, norm_theta_errors]
         numpy.save (filename, norm_results)
 
     return norm_results
+
+def corr (filename, training_feature_set, training_target_set):
+
+    try:
+        results = numpy.load (filename)
+
+    except FileNotFoundError:
+
+        results = []
+
+        c = numpy.corrcoef(training_feature_set, training_target_set, rowvar = True)
+
+        for i, corr in enumerate (c [len (c) - 1]):
+            if i != len (c) - 1:
+                results.append (corr)
+
+        numpy.save (filename, results)
+
+    return results
