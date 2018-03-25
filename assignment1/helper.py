@@ -212,3 +212,21 @@ def corr (filename, training_feature_set, training_target_set):
         numpy.save (filename, results)
 
     return results
+
+def processDiscreteFeatures (feature_matrix, discrete_groups):
+
+    result = feature_matrix.copy ()
+
+    indexes_to_remove = []
+
+    for group in discrete_groups:
+        g = numpy.zeros (feature_matrix.shape [1])
+
+        for i, feature in enumerate (group):
+            g += 2 ** (feature_matrix [feature] * (i + 1))
+
+        result [group] = g
+
+        indexes_to_remove += group [1:]
+
+    return numpy.delete (result, indexes_to_remove, axis = 0)

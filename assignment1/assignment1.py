@@ -3,6 +3,7 @@ import helper
 import math
 import matplotlib.pyplot
 import random
+import sys
 
 ### Common data for all the assignment
 training_csv = "2018s1-mo444-assignment-01/train.csv"
@@ -22,6 +23,11 @@ print ("Test set matrix size = " + str(test_feature_set.shape))
 test_target_set = numpy.loadtxt (open (test_target_csv, "rb"), delimiter=",", skiprows = 1)
 print ("Test target set matrix size = " + str(test_target_set.shape))
 
+training_feature_set = helper.processDiscreteFeatures (training_feature_set, discrete_groups = [range (11, 17), range (29, 37)])
+test_feature_set = helper.processDiscreteFeatures (test_feature_set, discrete_groups = [range (11, 17), range (29, 37)])
+
+print (training_feature_set.shape)
+print (test_feature_set.shape)
 ### Linear regression Y = 0oXo + 01X1 + 02X2 + ...., which Xo = 1 and X1, X2, ..., Xn are the features
 
 print ("Linear Regression - Y = 0oXo + 01X1 + 02X2 + ...")
