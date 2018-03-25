@@ -71,6 +71,9 @@ ax[1].grid ()
 
 matplotlib.pyplot.tight_layout()
 
+print ("Minimum RMS with Normal Equation = " + str (min (norm_results[3])))
+print ("Minimum RMS with LR = " + str (min (lr_results[2])))
+
 ### Linear regression Y = 0oXo + 01X1 + 02X2 + ...., which Xo = 1 and X1, X2, ..., Xn are the features with REGULARIZATION
 
 regularization = 0.8
@@ -117,6 +120,9 @@ ax[1].set_title (r"RMS between LR and normal equations $\theta$ arrays with regu
 ax[1].grid ()
 
 matplotlib.pyplot.tight_layout()
+
+print ("Minimum RMS with Normal Equation (Regularized) = " + str (min (norm_reg_results[3])))
+print ("Minimum RMS with LR (Regularized) = " + str (min (lr_reg_results[2])))
 
 # Variable selection
 
@@ -240,7 +246,7 @@ test_plot, = ax[0].plot (norm_results_second[1], norm_results_second[3], label =
 ax[0].set_ylabel ("Root Mean Square Error")
 ax[0].set_xlabel ("# training samples")
 ax[0].legend (handles = [traning_plot, test_plot])
-ax[0].set_title  ("Normal equation RMS erros with second order features")
+ax[0].set_title  ("Normal equation RMS errors with second order features")
 ax[0].grid ()
 
 ax[1].plot (norm_results_second[1], norm_results_second[4])
@@ -250,6 +256,9 @@ ax[1].set_title (r"RMS between LR and normal equations $\theta$ arrays with seco
 ax[1].grid ()
 
 matplotlib.pyplot.tight_layout()
+
+print ("Minimum RMS with Normal Equation (Second Order) = " + str (min (norm_results_second[3])))
+print ("Minimum RMS with LR (Second Order) = " + str (min (lr_results_second[2])))
 
 print ("Linear Regression - Third order")
 
@@ -269,7 +278,7 @@ test_plot, = ax.plot (range(len (lr_results_third[2])), lr_results_third[2], lab
 matplotlib.pyplot.ylabel ("Root Mean Square Error")
 matplotlib.pyplot.xlabel ("# iteration")
 matplotlib.pyplot.legend(handles = [traning_plot, test_plot])
-matplotlib.pyplot.title (r"$Y = \theta_0X_0 + \theta_1X_1 + \theta_2X_2 + ... + \theta_nX_n + \theta_{n+1}}X_1^2 + \theta_{n+2}}X_2^2 + ... + \theta_mX_1^3 + \theta_{m+1}X_2^3 + ... $")
+matplotlib.pyplot.title (r"$Y = \theta_0X_0 + \theta_1X_1 + \theta_2X_2 + ... + \theta_nX_n + \theta_{n+1}X_1^2 + \theta_{n+2}X_2^2 + ... + \theta_{2n+1}X_1^3 + \theta_{2n+2}X_2^3 + ... $")
 matplotlib.pyplot.suptitle ("Linear regression RMS errors with third order features")
 
 matplotlib.pyplot.grid ()
@@ -295,5 +304,8 @@ ax[1].set_title (r"RMS between LR and normal equations $\theta$ arrays with thir
 ax[1].grid ()
 
 matplotlib.pyplot.tight_layout()
+
+print ("Minimum RMS with Normal Equation (Second Order) = " + str (min (norm_results_third[3])))
+print ("Minimum RMS with LR (Second Order) = " + str (min (lr_results_third[2])))
 
 matplotlib.pyplot.show (block = True)

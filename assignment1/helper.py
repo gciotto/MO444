@@ -64,7 +64,7 @@ def gradientDescent (training_feature_set, training_target_set, test_feature_set
     feature_count = training_feature_set.shape [0]
     sample_count = training_feature_set.shape [1]
 
-    thetas = numpy.random.randn (feature_count, 1)
+    thetas = numpy.random.randn (feature_count)
 
     step = 0
 
@@ -75,11 +75,10 @@ def gradientDescent (training_feature_set, training_target_set, test_feature_set
     std = training_params [3] [0]
 
     predicted_target = thetas.transpose().dot (training_feature_set)
-    rms = math.sqrt((((training_target_set - predicted_target[0]) * std) ** 2).mean ())
+    rms = math.sqrt((((training_target_set - predicted_target) * std) ** 2).mean ())
     print (rms)
 
     train_error.append (rms)
-
     test_error.append (evaluateTheta (test_feature_set, test_target_set, thetas, mean, std))
 
     while step < max_steps:
@@ -89,13 +88,13 @@ def gradientDescent (training_feature_set, training_target_set, test_feature_set
             summ = 0.0
 
             for i in range (sample_count):
-                summ += ((predicted_target [0][i] - training_target_set [i]) * training_feature_set [j][i])
+                summ += ((predicted_target [i] - training_target_set [i]) * training_feature_set [j][i])
 
             thetas [j] = thetas[j] - (alpha / sample_count) * (summ + regularization * thetas[j])
 
         predicted_target = thetas.transpose().dot (training_feature_set)
 
-        rms = math.sqrt ((((training_target_set - predicted_target [0]) * std) ** 2).mean ())
+        rms = math.sqrt ((((training_target_set - predicted_target) * std) ** 2).mean ())
         print (rms)
 
         train_error.append (rms)
@@ -104,9 +103,8 @@ def gradientDescent (training_feature_set, training_target_set, test_feature_set
         step += 1
 
         if len (train_error) > 1:
-            err = train_error [len (train_error) - 2] - train_error [len (train_error) - 1]
-
-            if err < 0:
+            err = (train_error [len (train_error) - 2] - rms) / rms
+            if err <= 0.0:
                 alpha = alpha / 2
                 print ("alpha = " + str (alpha))
 
