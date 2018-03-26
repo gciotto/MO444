@@ -139,6 +139,30 @@ Essa seção é dedicada à discussão das soluções propostas. Foram realizado
 
 \subsection {Modelo linear simples}
 
+Neste modelo, utiliza-se o método de regressão linear sem regularização e sem quaisquer termos de segunda ou terceira ordens. Para a técnica de \textit{gradient descent}, itera-se a fórmula \ref{gd} 100 vezes no total. A figura \ref{fig:lr-gd} representa os erros quadrados médios conforme equação \ref{rms} obtidos no treinamento e no teste a cada iteração. Observa-se que ambos os erros se estabilizam em torno de, respectivamente, 10750 e 14600, e que não há a presença dos efeitos negativos de \textit {overfitting}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\columnwidth]{img/lr-gd.png}
+    \caption{RMS obtidos no treinamento e teste a cada iteração.}
+    \label{fig:lr-gd}
+\end{figure}
+
+A figura \ref{fig:lr-norm}, por sua vez, representa os resultados encontrados a partir do uso da expressão \ref{norm}. Dois gráficos são mostrados: no primeiro, compara-se os erros obtidos no treinamento e teste para diversos tamanhos de conjuntos de entrada indo de 10000 até 31715, enquanto que no segundo, compara-se os vetores \(\bm{\theta}\) obtidos pelos dois métodos descritos nessa seção. Conforme esperado, o RMS encontrado para o método normal, em torno de 10590, foi inferior aquele encontrado por \textit{gradient descent}. Observa-se também que as diferenças entre os vetores \(\bm{\theta}\) tendem a aumentar com o tamanho do conjunto de entrada.
+
+\subsection{Modelo linear simples regularizado}
+
+\subsection{Modelo linear de segunda ordem}
+
+\subsection{Modelo linear de terceira ordem}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\columnwidth]{img/lr-norm.png}
+    \caption{RMS obtidos no treinamento e teste para diversos números de amostras.}
+    \label{fig:lr-norm}
+\end{figure}
+
 %%% Add section %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experiments and Discussion}
 
