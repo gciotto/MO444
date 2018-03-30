@@ -1,7 +1,7 @@
 %%% PREAMBLE - Do not touch %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \documentclass[10pt,twocolumn,letterpaper]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[portuges,brazil,english]{babel}
+\usepackage[brazil]{babel}
 \usepackage{bm}
 \usepackage{model}
 \usepackage{times}
@@ -62,7 +62,7 @@ O segundo método, chamado de \textbf{gradient descent}, é iterativo e não req
 
 \begin{equation}
 \label {gd}
-\bm{\theta}_j = \bm{\theta}_j - \frac{\alpha}{M} \displaystyle\sum_{i=1}^{M} \left(\bm{\theta}^T\bm{x}^{(i)} - \bm{t}^{(i)}\right)\bm{x}_j^{(i)}
+\bm{\theta}_j = \bm{\theta}_j - \alpha\frac{\partial J}{\partial \bm{\theta}_j } = \bm{\theta}_j - \frac{\alpha}{M} \displaystyle\sum_{i=1}^{M} \left(\bm{\theta}^T\bm{x}^{(i)} - \bm{t}^{(i)}\right)\bm{x}_j^{(i)}
 \end{equation}
 
 A equação \ref{gd} introduz o parâmetro \(\alpha\), chamado de \textit{learning rate}. Tal parâmetro controla a velocidade de convergência ao mínimo global, isto é, quanto maior o seu valor mais rapidamente ele é atingido. Por outro lado, valores muito grandes produzirão um efeito denominado \textit {overshooting}, isto é, a solução encontrada sempre ficará \textit{balançando} ao redor do mínimo sem nunca atingí-lo. Nas próximas seções, o autor explica a estratégia para a definição desta grandeza para o problema deste relatório.
@@ -75,7 +75,7 @@ Tendo visto toda teoria por trás da regressão linear, podemos aplicá-la a dad
 As próximas subseções visam explicar as escolhas dos diversos parâmetros adotados pelo autor.
 
 \subsection{Ajuste do learning rate}
-
+\label{sec:ajuste}
 Conforme mencionado na seção \ref{intro}, o parâmetro \textit{learning rate} controla a velocidade de convergência ao mínimo global da função de custo. Tendo em vista as questões levantadas nesta mesma seção, adota-se um valor \(\alpha\) inicial igual a 0.5, modificando-o em apenas duas situações:
 
 \begin{itemize}
@@ -91,9 +91,7 @@ Nestes dois casos, o valor de \(\alpha\) é diminuído pela metade.
 
 \subsection {Ajuste das variáveis discretas}
 
-A descrição dos atributos de cada uma das entradas revelou a presença de algumas variáveis discretas. Dois grupos foram identificados: um com variáveis do tipo \textit{a publicação ocorreu na segunda-feira?}, \textit{a publicação ocorreu na terça-feira?} e assim por diante, e outro com atributos semelhantes a \textit{o canal é de entretenimento?}. Duas abordagens foram simuladas para estes casos: a primeira foi simplesmente não realizar nenhuma transformação às variáveis e associar um \(\bm{\theta}_j\) a cada uma delas no modelo. A segunda, por sua vez, consistiu em transformar cada grupo em apenas um atributo a partir de potências de 2, isto é, ele será ascrescido de \(2^k\) se a k-ésima variável do grupo valer 1.
-
-Os dois modelos foram testados, porém nenhum deles se destacou em termos dos erros de teste. Dessa forma, por apresentar um número menor de atributos, os resultados apresentados nas seções correspondem à \textbf{segunda abordagem apresentada}.
+A descrição dos atributos de cada uma das entradas revelou a presença de algumas variáveis discretas. Dois grupos foram identificados: um com variáveis do tipo \textit{a publicação ocorreu na segunda-feira?}, \textit{a publicação ocorreu na terça-feira?} e assim por diante, e outro com atributos semelhantes a \textit{o canal é de entretenimento?}. Antes de utilizá-las ou não nos modelos propostos a seguir, é preciso verificar se tais variáveis são \textbf {ortogonais} entre si, isto é, se a distância entre elas consideradas duas a duas é sempre a mesma. Levando-se em consideração que as variáveis de ambos os grupos nunca podem ser setadas simultaneamente (uma publicação não pode ocorrer na segunda e na terça e ela não pode pertencer a dois canais ao mesmo tempo, por exemplo), observa-se a propriedade de \textbf {ortogonalidade} e, portanto, podemos utilizá-las sem quaisquer modificações.
 
 \subsection {Normalização dos dados de entrada e de saída}
 
@@ -109,6 +107,8 @@ Vale lembrar que os valores \(\mu_j\) e \(\sigma_j\) devem ser amarzenados para 
 
 \subsection{Regularização}
 
+\label{sec:reg}
+
 A regularização é uma técnica que permite limitar os efeitos negativos de \textit{overfitting} sem a eliminação de nenhum atributo do modelo a partir da penalização dos parâmetros \(\bm{\theta}_j\). Neste caso, a equação \ref{cost} torna-se:
 
 \begin{equation}
@@ -116,7 +116,7 @@ A regularização é uma técnica que permite limitar os efeitos negativos de \t
 J(\bm{\theta}, \bm{x}) = \frac{1}{2M} \left[\displaystyle\sum_{i=1}^{M} \left(\bm{\theta}^T\bm{x}^{(i)} - \bm{t}^{(i)}\right)^2 + \lambda \displaystyle\sum_{j=2}^{N + 1} \bm{\theta}_j^2 \right]
 \end{equation}
 
-Observa-se que se \(\lambda\) é muito grande, então o processo de minimização produzirá \(\bm{\theta}_j\) pequenos, resultando em um modelo \textit{biased}. Em oposição, \(\lambda\) pequenos não conseguiriam combater os efeitos de \textit{overfitting} e a variação criada pelos dados de testes seria grande. Como mostrado na próxima seção, como não verificamos \textit{overfitting} durante os testes, atribui-se um valor pequeno a \(\lambda\), isto é, 0.8.
+Observa-se que se \(\lambda\) é muito grande, então o processo de minimização produzirá \(\bm{\theta}_j\) pequenos, resultando em um modelo polarizado que não seria bem-sucedido em se adequar corretamente aos dados. Em oposição, \(\lambda\) pequenos não conseguiriam combater os efeitos de \textit{overfitting} e a variação criada pelos dados de testes seria grande.
 
 A equação \ref{norm}, por sua vez, transforma-se na expressão \ref{normal-reg}, sendo \(\bm{I}_{N \times N}\) a matriz identidade:
 
@@ -139,7 +139,7 @@ Essa seção é dedicada à discussão das soluções propostas. Foram realizado
 
 \subsection {Modelo linear simples}
 
-Neste modelo, utiliza-se o método de regressão linear sem regularização e sem quaisquer termos de segunda ou terceira ordens. Para a técnica de \textit{gradient descent}, itera-se a fórmula \ref{gd} 100 vezes no total. A figura \ref{fig:lr-gd} representa os erros quadrados médios conforme equação \ref{rms} obtidos no treinamento e no teste a cada iteração. Observa-se que ambos os erros se estabilizam em torno de, respectivamente, 10750 e 14600, e que não há a presença dos efeitos negativos de \textit {overfitting}.
+Neste modelo, utiliza-se o método de regressão linear sem regularização e sem quaisquer termos de segunda ou terceira ordens. Para a técnica de \textit{gradient descent}, itera-se a fórmula \ref{gd} 100 vezes no total. A figura \ref{fig:lr-gd} representa os erros quadrados médios conforme equação \ref{rms} obtidos no treinamento e no teste a cada iteração. Observa-se que ambos os erros se estabilizam em torno de, respectivamente, 10700 e 14700, e que não há a presença dos efeitos negativos de \textit {overfitting}.
 
 \begin{figure}
     \centering
@@ -148,13 +148,7 @@ Neste modelo, utiliza-se o método de regressão linear sem regularização e se
     \label{fig:lr-gd}
 \end{figure}
 
-A figura \ref{fig:lr-norm}, por sua vez, representa os resultados encontrados a partir do uso da expressão \ref{norm}. Dois gráficos são mostrados: no primeiro, compara-se os erros obtidos no treinamento e teste para diversos tamanhos de conjuntos de entrada indo de 10000 até 31715, enquanto que no segundo, compara-se os vetores \(\bm{\theta}\) obtidos pelos dois métodos descritos nessa seção. Conforme esperado, o RMS encontrado para o método normal, em torno de 10590, foi inferior aquele encontrado por \textit{gradient descent}. Observa-se também que as diferenças entre os vetores \(\bm{\theta}\) tendem a aumentar com o tamanho do conjunto de entrada.
-
-\subsection{Modelo linear simples regularizado}
-
-\subsection{Modelo linear de segunda ordem}
-
-\subsection{Modelo linear de terceira ordem}
+A figura \ref{fig:lr-norm}, por sua vez, representa os resultados encontrados a partir do uso da expressão \ref{norm}. Dois gráficos são mostrados: no primeiro, compara-se os erros obtidos no treinamento e teste para diversos tamanhos de conjuntos de entrada indo de 10000 até 31715, enquanto que no segundo, compara-se os vetores \(\bm{\theta}\) obtidos pelos dois métodos descritos nessa seção. Conforme esperado, o RMS encontrado para o método normal, em torno de 10580, foi inferior aquele encontrado por \textit{gradient descent}. O erro de teste, por sua vez, também ficou em torno de 14570. Observa-se também que algumas diferenças consideráveis entre os vetores \(\bm{\theta}\) sobretudo para os conjuntos de dados com tamanhos intermediários.
 
 \begin{figure}
     \centering
@@ -163,11 +157,61 @@ A figura \ref{fig:lr-norm}, por sua vez, representa os resultados encontrados a 
     \label{fig:lr-norm}
 \end{figure}
 
-%%% Add section %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Experiments and Discussion}
+\subsection{Modelo linear simples regularizado}
+
+Apesar de não ter sido observado efeitos de \textit{overfitting} nos resultados anteriores, propomos o uso da regularização, conforme explicado na subseção \ref{sec:reg}. Foram testados dois valores de \(\lambda\), um igual a 1.0 e o outro, vinte vezes maior, 20.0. A figura \ref{fig:reg-comparison} compara os resultados encontrados para a técnica de \textit{gradient descent} entre os modelos regularizados e aquele da subseção anterior. Verifica-se que, para estes casos, a regularização não modificou substantivamente o erro encontrado, tanto para o conjunto de treinamento quanto o de teste. Isso indica que os valores sugeridos de \(\lambda\) são muito pequenos quando comparados a cada um dos fatores \(\bm{\theta}_j^2\) individualmente.  Estes mesmos modelos também foram submetidos às equações normais, porém, assim como no \textit{gradient descent}, nenhuma grande alteração foi observada.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\columnwidth]{img/lr-comparation.png}
+    \caption{RMS obtidos nos modelos regularizados.}
+    \label{fig:reg-comparison}
+\end{figure}
+
+\subsection{Redução de atributos do modelo}
+
+Uma outra tentativa realizada para minimizar o erro foi reduzir o número de atributos utilizados para o modelo. A seleção dos atributos foi feita de acordo com a correlação de cada um deles em relação à saída, uma vez que, como o modelo ainda é linear, espera-se que variáveis mais correlatas sigam o mesmo padrão que aquele observado na saída. A figura \ref {fig:correlation} representa apenas as 10 variáveis mais correlatas e que foram utilizadas para o novo modelo proposto. Vale dizer que a correlação mais alta, correspondente ao atributo 25 (\textit{Avg. keyword (avg. shares)}), ainda é um valor bem baixo, isto é, 0.125, indicando que nenhuma vaiável influencia fortemente o número de compartilhamentos de uma publicação. A figura \ref{fig:comparison-selection} compara os resultados encontrados para o modelo linear simples e para o modelo proposto nesta subseção. Observa-se um ligeiro aumento do erro de treinamento para o modelo reduzido a partir da iteração 10, indicando uma leve presença de \textit {overfitting}. Além disso, verifica-se que ambos os erros de treinamento e teste do modelo reduzido convergem mais rapidamente do que aqueles do modelos simples aos valores onde permanecem praticamente constantes. Por fim, ressalta-se que as equações normais também foram utilizadas, porém seus resultados não são representados neste relatório por efeitos de simplificação.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\columnwidth]{img/lr-selection.png}
+    \caption{Correlação dos atributos de entrada com a saída.}
+    \label{fig:correlation}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\columnwidth]{img/lr-comparation-selection.png}
+    \caption{Comparação entre modelo linear simples e aquele com as 10 variáveis mais correlatas com a saída.}
+    \label{fig:comparison-selection}
+\end{figure}
+
+\subsection{Modelo linear com atributos de segunda ordem}
+
+Outra técnica que pode ser empregada para reduzir os erros de treinamento e teste é a adição de novos atributos baseados nos já existentes ao modelo simples. Nessa etapa, portanto, adiciona-se ao modelo linear simples todas as suas variáveis ao quadrado, de forma a obter a nova relação \(Y_2 = Y + \theta_{N+1}X_1^2 + \theta_{N+2}X_2^2 + \ldots + \theta_{2N}X_N^2\). Espera-se com esse novo modelo uma melhor adequação aos dados de treinamento e aos de teste simultaneamente, isto é, sem a observação de \textit{overfitting}.  Vale lembrar que as equações \ref{normal} e \ref{gd} não sofrem quaisquer alterações, dado o fato que a equação de custo \ref{cost} continua linear em \(\bm{\theta}\). A figura \ref{fig:gd-second} possui o resultado da técnica de \textit{gradient descent} para este modelo. Observa-se que na iteração 17, o valor de \(\alpha\) é modificado, conforme descrito na seção \ref{sec:ajuste}, uma vez que o erro produzido foi superior àquele encontrado na iteração precedente. Os erros RMS de treinamento e de teste ao fim de 100 iterações encontrados foram, respectivamente, 11830 e 15570, superiores àqueles verificados para o modelo linear simples. O uso da equação \ref{normal}, por sua vez, resultou em erros em torno de 10540 e 14580, muito parecidos àqueles obtidos pela mesma técnica aplicado ao modelo linear simples.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\columnwidth]{img/lr-second-gd.png}
+    \caption{RMS obtidos no treinamento e teste do modelo com atributos de segunda ordem a cada iteração.}
+    \label{fig:gd-second}
+\end{figure}
+
+\subsection{Modelo linear com atributos de terceira ordem}
+
+O último modelo testado neste relatório utilizou atributos de segunda e terceira ordens, obtendo a expressão \(Y_3 = Y_2 + \theta_{2N+1}X_1^3 + \theta_{2N+2}X_2^3 + \ldots + \theta_{3N}X_N^3\). A figura \ref{fig:gd-third} possui a evolução dos erros encontrados no decorrer das 100 iterações. Assim como ocorrido na figura \ref{fig:gd-second}, o valor do parâmetro \(\alpha\) - \textit{learning rate} - teve que ser diminuído, já que o erro de treinamento da iteração 3 foi superior àquele da iteração 2. Os menores erros RMS encontrados para treinamento e teste foram, respectivamente, 12743 e 16208, superiores àqueles obtidos no modelo linear simples. Por fim, o uso das equações normais resultou em erros iguais a 10458 e 15084. O primeiro foi ligeiramente inferior àquele do modelo simples, enquanto que o segundo, superior. Esse fato ilustra bem uma das dificuldades encontradas quando aumenta-se a complexidade do modelo, o \textit{overfitting}. Neste caso, diminui-se o erro do conjunto de treinamento, porém aumenta-se o do conjunto de teste, indicando que o modelo se adequou de maneira exagerada aos dados de treinamento. Conforme já discutido, uma das possíveis soluções a este problema é a regularização.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\columnwidth]{img/lr-third-gd.png}
+    \caption{RMS obtidos no treinamento e teste do modelo com atributos de segunda e terceira ordens a cada iteração.}
+    \label{fig:gd-third}
+\end{figure}
 
 %%% Add section %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusions and Future Work}
+\section{Conclusions}
+
+Cinco modelos lineares foram propostos para a predição do número de compartilhamentos de uma publicação da rede social Mashable. Em praticamente todos eles, os erros RMS de treinamento e teste ficaram em torno de 10500 e 14500, respectivamente, indicando que o modelo linear não é capaz de modelar com precisão o comportamento dos usuários desta rede social. 
 
 %%% References %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 {\small
