@@ -51,15 +51,12 @@ def evaluateTheta (test_feature_set, test_target_set, theta, mean, std):
     predicted_target = theta.transpose().dot (test_feature_set) * std + mean
     test_target_set_denorm = test_target_set * std + mean
 
-    if len(predicted_target.shape) > 1:
-        predicted_target = predicted_target [0]
-
     print (test_target_set_denorm)
     print (predicted_target)
 
     return math.sqrt(((test_target_set_denorm - predicted_target) ** 2).mean ())
 
-def gradientDescent (training_feature_set, training_target_set, test_feature_set, test_target_set, training_params = [], alpha = 0.1, regularization = 0, max_steps = 30):
+def gradientDescent (training_feature_set, training_target_set, test_feature_set, test_target_set, training_params = [], alpha = 0.1, regularization = 0, max_steps = 100):
 
     feature_count = training_feature_set.shape [0]
     sample_count = training_feature_set.shape [1]
@@ -154,7 +151,10 @@ def normalEquation (filename, training_feature_set, training_target_set, test_fe
         norm_test_errors = []
         norm_theta_errors = []
 
-        for feat_size in range (500, training_feature_set.shape [1], 2500):
+        ranges = list(range (10000, training_feature_set.shape [1], 2500))
+        ranges.append (training_feature_set.shape [1] - 1)
+
+        for feat_size in ranges:
 
             # Choose a subset of the features
             indexes = range (feat_size)
