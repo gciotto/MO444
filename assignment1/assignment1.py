@@ -19,6 +19,16 @@ print ("Training set matrix size = " + str(training_feature_set.shape))
 training_target_set = numpy.loadtxt (open (training_csv, "rb"), delimiter = ",", skiprows = 1, usecols = 60)
 print ("Training target set matrix size = " + str(training_target_set.shape))
 
+validation_range = random.sample (range (0, training_feature_set.shape [1]), int (training_feature_set.shape [1] * 0.3))
+validation_feature_set = training_feature_set [:, validation_range]
+validation_target_set = training_target_set [validation_range]
+
+print (validation_feature_set.shape)
+print (validation_target_set.shape)
+
+training_feature_set_gd = numpy.delete (training_feature_set, validation_range, axis = 1)
+target_feature_set_gd = numpy.delete (training_target_set, validation_range)
+
 print (training_feature_set.shape)
 print (training_target_set.shape)
 
@@ -37,17 +47,19 @@ print (test_feature_set.shape)
 
 print ("Linear Regression - Y = 0oXo + 01X1 + 02X2 + ...")
 
-lr_results = helper.linearRegression ("data/lr.npy", training_feature_set, training_target_set, \
+lr_results = helper.linearRegression ("data/lr.npy", training_feature_set_gd, target_feature_set_gd, \
+                                                     validation_feature_set, validation_target_set, \
                                                      test_feature_set, test_target_set)
 
 fig, ax = matplotlib.pyplot.subplots (1, sharex = True)
 
 traning_plot, = ax.plot (range(len (lr_results[1])), lr_results[1], label = "Training RMS")
-test_plot, = ax.plot (range(len (lr_results[2])), lr_results[2], "--", label = "Testing RMS")
+validation_plot, = ax.plot (range(len (lr_results[2])), lr_results[2], "-.", label = "Validation RMS")
+test_plot, = ax.plot (range(len (lr_results[3])), lr_results[3], "--", label = "Testing RMS")
 
 matplotlib.pyplot.ylabel ("Root Mean Square Error")
 matplotlib.pyplot.xlabel ("# iteration")
-matplotlib.pyplot.legend(handles = [traning_plot, test_plot])
+matplotlib.pyplot.legend(handles = [traning_plot, validation_plot, test_plot])
 matplotlib.pyplot.title (r"$Y = \theta_0X_0 + \theta_1X_1 + \theta_2X_2 + ... + \theta_nX_n$")
 matplotlib.pyplot.suptitle ("Linear regression RMS errors")
 
@@ -85,18 +97,20 @@ regularization = 1
 
 print ("Linear Regression - Y = 0oXo + 01X1 + 02X2 + ...")
 
-lr_reg_results = helper.linearRegression ("data/lr-reg.npy", training_feature_set, training_target_set, \
+lr_reg_results = helper.linearRegression ("data/lr-reg.npy", training_feature_set_gd, target_feature_set_gd, \
+                                                             validation_feature_set, validation_target_set, \
                                                              test_feature_set, test_target_set, \
                                                              regularization = regularization)
 
 fig, ax = matplotlib.pyplot.subplots (1, sharex = True)
 
 traning_plot, = ax.plot (range(len (lr_reg_results [1])), lr_reg_results[1], label = "Training RMS")
-test_plot, = ax.plot (range(len (lr_reg_results [2])), lr_reg_results [2], "--", label = "Testing RMS")
+validation_plot, = ax.plot (range(len (lr_reg_results[2])), lr_reg_results[2], "-.", label = "Validation RMS")
+test_plot, = ax.plot (range(len (lr_reg_results [3])), lr_reg_results [3], "--", label = "Testing RMS")
 
 matplotlib.pyplot.ylabel ("Root Mean Square Error")
 matplotlib.pyplot.xlabel ("# iteration")
-matplotlib.pyplot.legend(handles = [traning_plot, test_plot])
+matplotlib.pyplot.legend(handles = [traning_plot, validation_plot, test_plot])
 matplotlib.pyplot.title (r"$Y = \theta_0X_0 + \theta_1X_1 + \theta_2X_2 + ... + \theta_nX_n$")
 matplotlib.pyplot.suptitle ("Regularized linear regression with $\lambda = " + str(regularization) + "$ RMS errors")
 
@@ -106,18 +120,43 @@ regularization = 20
 
 print ("Linear Regression - Y = 0oXo + 01X1 + 02X2 + ...")
 
-lr_reg_results_4 = helper.linearRegression ("data/lr-reg-4.npy", training_feature_set, training_target_set, \
-                                                                test_feature_set, test_target_set, \
-                                                                regularization = regularization)
+lr_reg_results_4 = helper.linearRegression ("data/lr-reg-4.npy", training_feature_set_gd, target_feature_set_gd, \
+                                                                 validation_feature_set, validation_target_set, \
+                                                                 test_feature_set, test_target_set, \
+                                                                 regularization = regularization)
 
 fig, ax = matplotlib.pyplot.subplots (1, sharex = True)
 
 traning_plot, = ax.plot (range(len (lr_reg_results_4 [1])), lr_reg_results_4[1], label = "Training RMS")
-test_plot, = ax.plot (range(len (lr_reg_results_4 [2])), lr_reg_results_4 [2], "--", label = "Testing RMS")
+validation_plot, = ax.plot (range(len (lr_reg_results_4[2])), lr_reg_results_4[2], "-.", label = "Validation RMS")
+test_plot, = ax.plot (range(len (lr_reg_results_4 [3])), lr_reg_results_4 [3], "--", label = "Testing RMS")
 
 matplotlib.pyplot.ylabel ("Root Mean Square Error")
 matplotlib.pyplot.xlabel ("# iteration")
-matplotlib.pyplot.legend(handles = [traning_plot, test_plot])
+matplotlib.pyplot.legend(handles = [traning_plot, validation_plot, test_plot])
+matplotlib.pyplot.title (r"$Y = \theta_0X_0 + \theta_1X_1 + \theta_2X_2 + ... + \theta_nX_n$")
+matplotlib.pyplot.suptitle ("Regularized linear regression with $\lambda = " + str(regularization) + "$ RMS errors")
+
+matplotlib.pyplot.grid ()
+
+regularization = 20000
+
+print ("Linear Regression - Y = 0oXo + 01X1 + 02X2 + ...")
+
+lr_reg_results_20000 = helper.linearRegression ("data/lr-reg-20000.npy", training_feature_set_gd, target_feature_set_gd, \
+                                                                         validation_feature_set, validation_target_set, \
+                                                                         test_feature_set, test_target_set, \
+                                                                         regularization = regularization)
+
+fig, ax = matplotlib.pyplot.subplots (1, sharex = True)
+
+traning_plot, = ax.plot (range(len (lr_reg_results_20000 [1])), lr_reg_results_20000[1], label = "Training RMS")
+validation_plot, = ax.plot (range(len (lr_reg_results_20000[2])), lr_reg_results_20000[2], "-.", label = "Validation RMS")
+test_plot, = ax.plot (range(len (lr_reg_results_20000 [3])), lr_reg_results_20000 [3], "--", label = "Testing RMS")
+
+matplotlib.pyplot.ylabel ("Root Mean Square Error")
+matplotlib.pyplot.xlabel ("# iteration")
+matplotlib.pyplot.legend(handles = [traning_plot, validation_plot, test_plot])
 matplotlib.pyplot.title (r"$Y = \theta_0X_0 + \theta_1X_1 + \theta_2X_2 + ... + \theta_nX_n$")
 matplotlib.pyplot.suptitle ("Regularized linear regression with $\lambda = " + str(regularization) + "$ RMS errors")
 
@@ -128,9 +167,9 @@ fig, ax = matplotlib.pyplot.subplots (1, sharex = True)
 
 traning_plot, = ax.plot (range(len (lr_results[1])), lr_results[1], ".", label = r"Training RMS - $\lambda = 0.0$")
 traning_plot_reg, = ax.plot (range(len (lr_reg_results[1])), lr_reg_results[1], label = r"Training RMS - $\lambda = 1.0$")
-test_plot_reg, = ax.plot (range(len (lr_reg_results[2])), lr_reg_results[2], "--", label = r"Testing RMS - $\lambda = 1.0$")
+test_plot_reg, = ax.plot (range(len (lr_reg_results[3])), lr_reg_results[3], "--", label = r"Testing RMS - $\lambda = 1.0$")
 traning_plot_4, = ax.plot (range(len (lr_reg_results_4[1])), lr_reg_results_4[1], "-.", label = r"Training RMS - $\lambda = 20.0$")
-test_plot_4, = ax.plot (range(len (lr_reg_results_4[2])), lr_reg_results_4[2], label = r"Testing RMS - $\lambda = 20.0$")
+test_plot_4, = ax.plot (range(len (lr_reg_results_4[3])), lr_reg_results_4[3], label = r"Testing RMS - $\lambda = 20.0$")
 
 matplotlib.pyplot.ylabel ("Root Mean Square Error")
 matplotlib.pyplot.xlabel ("# iteration")
@@ -219,8 +258,8 @@ for i in sorted_index:
     sorted_corr.append (corr[i])
 
 fig, ax = matplotlib.pyplot.subplots (1, sharex = True)
-labels = [str(i) for i in sorted_index]
-matplotlib.pyplot.plot (range (len (sorted_corr [-10:])), sorted_corr[-10:], "*-")
+labels = [str (i+2) for i in sorted_index]
+matplotlib.pyplot.plot (range (len (sorted_corr[-10:])), sorted_corr[-10:], "*-")
 
 for label, x, y in zip (labels [-10:], range (len (sorted_corr[-10:])), sorted_corr[-10:]):
     matplotlib.pyplot.annotate (label, xy = (x, y), xytext = (-0.5, 0.5),  textcoords='offset points', ha='right', va='bottom')
@@ -237,17 +276,19 @@ n_biggest = sorted_index [-n:]
 
 print (training_feature_set [n_biggest].shape)
 
-lr_results_n_biggest = helper.linearRegression ("data/lr-n-biggest.npy", training_feature_set [n_biggest], training_target_set, \
+lr_results_n_biggest = helper.linearRegression ("data/lr-n-biggest.npy", training_feature_set_gd [n_biggest], target_feature_set_gd, \
+                                                                         validation_feature_set [n_biggest], validation_target_set, \
                                                                          test_feature_set [n_biggest], test_target_set)
 
 fig, ax = matplotlib.pyplot.subplots (1, sharex = True)
 
 traning_plot, = ax.plot (range(len (lr_results_n_biggest[1])), lr_results_n_biggest[1], label = "Training RMS")
-test_plot, = ax.plot (range(len (lr_results_n_biggest[2])), lr_results_n_biggest[2], "--", label = "Testing RMS")
+validation_plot, = ax.plot (range(len (lr_results_n_biggest[2])), lr_results_n_biggest[2], "-.", label = "Validation RMS")
+test_plot, = ax.plot (range(len (lr_results_n_biggest[3])), lr_results_n_biggest[3], "--", label = "Testing RMS")
 
 matplotlib.pyplot.ylabel ("Root Mean Square Error")
 matplotlib.pyplot.xlabel ("# iteration")
-matplotlib.pyplot.legend(handles = [traning_plot, test_plot])
+matplotlib.pyplot.legend(handles = [traning_plot, validation_plot, test_plot])
 matplotlib.pyplot.title (r"$Y = \theta_0X_0 + \theta_1X_1 + \theta_2X_2 + ... + \theta_nX_n$")
 matplotlib.pyplot.suptitle ("N most correlated features linear regression")
 
@@ -282,10 +323,10 @@ matplotlib.pyplot.tight_layout()
 fig, ax = matplotlib.pyplot.subplots (1, sharex = True)
 
 traning_plot_n_biggest, = ax.plot (range(len (lr_results_n_biggest[1])), lr_results_n_biggest[1], label = "Training RMS - N most correlated features")
-test_plot_n_biggest, = ax.plot (range(len (lr_results_n_biggest[2])), lr_results_n_biggest[2], "--", label = "Testing RMS - N most correlated features")
+test_plot_n_biggest, = ax.plot (range(len (lr_results_n_biggest[3])), lr_results_n_biggest[3], "--", label = "Testing RMS - N most correlated features")
 traning_plot, = ax.plot (range(len (lr_results[1])), lr_results[1],
 "-.", label = "Training RMS")
-test_plot, = ax.plot (range(len (lr_results[2])), lr_results[2], label = "Testing RMS")
+test_plot, = ax.plot (range(len (lr_results[3])), lr_results[3], label = "Testing RMS")
 
 matplotlib.pyplot.ylabel ("Root Mean Square Error")
 matplotlib.pyplot.xlabel ("# iteration")
@@ -295,29 +336,32 @@ matplotlib.pyplot.suptitle ("Linear regression\nComparison between regular and N
 
 matplotlib.pyplot.grid ()
 
-matplotlib.pyplot.show (block = True)
-
 # More complex models
 
 print ("Linear Regression - Second Order")
 
 training_feature_set_second = numpy.append (training_feature_set, training_feature_set ** 2, axis = 0)
+training_feature_set_gd_second = numpy.append (training_feature_set_gd, training_feature_set_gd ** 2, axis = 0)
+validation_feature_set_second = numpy.append (validation_feature_set, validation_feature_set ** 2, axis = 0)
 print (training_feature_set_second.shape)
 
 test_feature_set_second = numpy.append (test_feature_set, test_feature_set ** 2, axis = 0)
 print (test_feature_set_second.shape)
 
-lr_results_second = helper.linearRegression ("data/lr-second-order.npy", training_feature_set_second, training_target_set, \
+lr_results_second = helper.linearRegression ("data/lr-second-order.npy", training_feature_set_gd_second, target_feature_set_gd, \
+                                                                         validation_feature_set_second, validation_target_set, \
                                                                          test_feature_set_second, test_target_set)
+
 
 fig, ax = matplotlib.pyplot.subplots (1, sharex = True)
 
 traning_plot, = ax.plot (range(len (lr_results_second[1])), lr_results_second[1], label = "Training RMS")
-test_plot, = ax.plot (range(len (lr_results_second[2])), lr_results_second[2], "--", label = "Testing RMS")
+validation_plot, = ax.plot (range(len (lr_results_second[2])), lr_results_second[2], "-.", label = "Validation RMS")
+test_plot, = ax.plot (range(len (lr_results_second[3])), lr_results_second[3], "--", label = "Testing RMS")
 
 matplotlib.pyplot.ylabel ("Root Mean Square Error")
 matplotlib.pyplot.xlabel ("# iteration")
-matplotlib.pyplot.legend(handles = [traning_plot, test_plot])
+matplotlib.pyplot.legend(handles = [traning_plot, validation_plot, test_plot])
 matplotlib.pyplot.title (r"$Y = \theta_0X_0 + \theta_1X_1 + \theta_2X_2 + ... + \theta_nX_n + \theta_{n+1}X_1^2 + \theta_{n+2}X_2^2 + ... $")
 matplotlib.pyplot.suptitle ("Linear regression with second order features")
 
@@ -354,21 +398,25 @@ print ("Linear Regression - Third order")
 
 training_feature_set_third = numpy.append (training_feature_set_second, training_feature_set ** 3, axis = 0)
 print (training_feature_set_third.shape)
-
+training_feature_set_gd_third = numpy.append (training_feature_set_gd_second, training_feature_set_gd ** 3, axis = 0)
+print (training_feature_set_third.shape)
+validation_feature_set_third = numpy.append (validation_feature_set_second, validation_feature_set ** 3, axis = 0)
 test_feature_set_third = numpy.append (test_feature_set_second, test_feature_set ** 3, axis = 0)
 print (test_feature_set_third.shape)
 
-lr_results_third = helper.linearRegression ("data/lr-third-order.npy", training_feature_set_third, training_target_set, \
+lr_results_third = helper.linearRegression ("data/lr-third-order.npy", training_feature_set_gd_third, target_feature_set_gd, \
+                                                                       validation_feature_set_third, validation_target_set, \
                                                                        test_feature_set_third, test_target_set)
 
 fig, ax = matplotlib.pyplot.subplots (1, sharex = True)
 
 traning_plot, = ax.plot (range(len (lr_results_third[1])), lr_results_third[1], label = "Training RMS")
-test_plot, = ax.plot (range(len (lr_results_third[2])), lr_results_third[2], "--", label = "Testing RMS")
+validation_plot, = ax.plot (range(len (lr_results_third[2])), lr_results_third[2], "-.", label = "Validation RMS")
+test_plot, = ax.plot (range(len (lr_results_third[3])), lr_results_third[3], "--", label = "Testing RMS")
 
 matplotlib.pyplot.ylabel ("Root Mean Square Error")
 matplotlib.pyplot.xlabel ("# iteration")
-matplotlib.pyplot.legend(handles = [traning_plot, test_plot])
+matplotlib.pyplot.legend(handles = [traning_plot, validation_plot, test_plot])
 matplotlib.pyplot.title (r"$Y = \theta_0X_0 + \theta_1X_1 + \theta_2X_2 + ... + \theta_nX_n + \theta_{n+1}X_1^2 + \theta_{n+2}X_2^2 + ... + \theta_{2n+1}X_1^3 + \theta_{2n+2}X_2^3 + ... $")
 matplotlib.pyplot.suptitle ("Linear regression RMS errors with third order features")
 

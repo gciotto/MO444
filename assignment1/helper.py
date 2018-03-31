@@ -56,7 +56,10 @@ def evaluateTheta (test_feature_set, test_target_set, theta, mean, std):
 
     return math.sqrt(((test_target_set_denorm - predicted_target) ** 2).mean ())
 
-def gradientDescent (training_feature_set, training_target_set, test_feature_set, test_target_set, training_params = [], alpha = 0.1, regularization = 0, max_steps = 100):
+def gradientDescent (training_feature_set, training_target_set, \
+                     validation_feature_set, validation_target_set, \
+                     test_feature_set, test_target_set, \
+                     training_params = [], alpha = 0.1, regularization = 0, max_steps = 100):
 
     feature_count = training_feature_set.shape [0]
     sample_count = training_feature_set.shape [1]
@@ -67,6 +70,7 @@ def gradientDescent (training_feature_set, training_target_set, test_feature_set
 
     train_error = []
     test_error = []
+    validation_error = []
 
     mean = training_params [2] [0]
     std = training_params [3] [0]
@@ -76,6 +80,7 @@ def gradientDescent (training_feature_set, training_target_set, test_feature_set
     print (rms)
 
     train_error.append (rms)
+    validation_error.append (evaluateTheta (validation_feature_set, validation_target_set, thetas, mean, std))
     test_error.append (evaluateTheta (test_feature_set, test_target_set, thetas, mean, std))
 
     while step < max_steps:
@@ -95,19 +100,23 @@ def gradientDescent (training_feature_set, training_target_set, test_feature_set
         print (rms)
 
         train_error.append (rms)
+        validation_error.append (evaluateTheta (validation_feature_set, validation_target_set, thetas, mean, std))
         test_error.append (evaluateTheta (test_feature_set, test_target_set, thetas, mean, std))
 
         step += 1
 
         if len (train_error) > 1:
             err = (train_error [len (train_error) - 2] - rms) / rms
-            if err <= 0.0:
+            if err < 0.0:
                 alpha = alpha / 2
                 print ("alpha = " + str (alpha))
 
-    return thetas, train_error, test_error
+    return thetas, train_error, validation_error, test_error
 
-def linearRegression (filename, training_feature_set, training_target_set, test_feature_set, test_target_set, regularization = 0, steps = 100):
+def linearRegression (filename, training_feature_set, training_target_set, \
+                                validation_feature_set, validation_target_set, \
+                                test_feature_set, test_target_set, \
+                                regularization = 0, steps = 100):
 
     try:
         results = numpy.load (filename)
@@ -118,22 +127,27 @@ def linearRegression (filename, training_feature_set, training_target_set, test_
         lr_training_feature_set, lr_feat_means, lr_feat_stds = normalize (training_feature_set)
         lr_training_target_set, lr_target_means, lr_target_stds = normalize (training_target_set)
 
+        lr_validation_feature_set, lr_validation_feat_means, lr_validation_feat_stds = normalize (validation_feature_set, means = lr_feat_means, stds = lr_feat_stds)
+        lr_validation_target_set, lr_validation_target_means, lr_validation_target_stds = normalize (validation_target_set, means = lr_target_means, stds = lr_target_stds)
+
         lr_test_feature_set, lr_test_feat_means, lr_test_feat_stds = normalize (test_feature_set, means = lr_feat_means, stds = lr_feat_stds)
         lr_test_target_set, lr_test_target_means, lr_test_target_stds = normalize (test_target_set, means = lr_target_means, stds = lr_target_stds)
 
         # Append bias columns in the features data sets
 
         lr_training_feature_set = appendBias (lr_training_feature_set)
+        lr_validation_feature_set = appendBias (lr_validation_feature_set)
         lr_test_feature_set = appendBias (lr_test_feature_set)
 
         # First version of the LR - simple model
-        theta_lr, train_error, test_error = gradientDescent (lr_training_feature_set, lr_training_target_set, \
-                                                             lr_test_feature_set, lr_test_target_set, \
-                                                             training_params = [lr_feat_means, lr_feat_stds, lr_target_means, lr_target_stds], \
-                                                             alpha = 0.25, regularization = regularization, \
-                                                             max_steps = steps)
+        theta_lr, train_error, validation_error, test_error = gradientDescent (lr_training_feature_set, lr_training_target_set, \
+                                                                               lr_validation_feature_set, lr_validation_target_set, \
+                                                                               lr_test_feature_set, lr_test_target_set, \
+                                                                               training_params = [lr_feat_means, lr_feat_stds, lr_target_means, lr_target_stds], \
+                                                                               alpha = 0.25, regularization = regularization, \
+                                                                               max_steps = steps)
 
-        results = [theta_lr, train_error, test_error]
+        results = [theta_lr, train_error, validation_error, test_error]
         numpy.save (filename, results)
 
     return results
