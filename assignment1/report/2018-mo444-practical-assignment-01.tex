@@ -83,7 +83,7 @@ Conforme mencionado na seção \ref{intro}, o parâmetro \textit{learning rate} 
 	\item A variação do erro entre as iterações \(k\) e \(k -1\), isto é, \(\frac{R_{k - 1} - R_k}{R_k}\), foi inferior a uma porcentagem \(\Delta = 0.5\%\). Neste caso, deseja-se eliminar os efeitos de \textit{overshooting} e aproximar o melhor possível do mínimo global. Denota-se de \(R_k\), dado pela fórmula \ref {rms}, o \textit{root-mean-square error} obtido na iteração \(k\):
 	\begin {equation}
 	\label{rms}
-	R_k = \sqrt{\frac {\sum_{i=1}^{M} \left(\bm{\theta}^T\bm{x}^{(i)} - \bm{t}^{(i)}\right)^2}{M}}
+	R_k = \sqrt{\frac {\sum_{i=1}^{M} \left(\bm{\theta}_k^T\bm{x}^{(i)} - \bm{t}^{(i)}\right)^2}{M}}
 	\end{equation}
 \end{itemize}
 
@@ -211,7 +211,7 @@ O último modelo testado neste relatório utilizou atributos de segunda e tercei
 %%% Add section %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions}
 
-Cinco modelos lineares foram propostos para a predição do número de compartilhamentos de uma publicação da rede social Mashable. Em praticamente todos eles, os erros RMS de treinamento e teste ficaram em torno de 10500 e 14500, respectivamente, indicando que o modelo linear não é capaz de modelar com precisão o comportamento dos usuários desta rede social. 
+Cinco modelos lineares foram propostos para a predição do número de compartilhamentos de uma publicação da rede social Mashable. Em praticamente todos eles, os erros RMS de treinamento e teste ficaram em torno de 10500 e 14500, respectivamente, indicando que o modelo linear não é capaz de modelar com precisão o comportamento dos usuários desta rede social.
 
 %%% References %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 {\small
