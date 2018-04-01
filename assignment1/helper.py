@@ -46,13 +46,16 @@ def appendBias (feature_matrix = []):
     feature_bias = numpy.ones ((1, feature_matrix.shape [1]))
     return numpy.append (feature_bias, feature_matrix, axis = 0)
 
-def evaluateTheta (test_feature_set, test_target_set, theta, mean, std):
+def evaluateTheta (test_feature_set, test_target_set, theta, mean, std, metric = "RMS"):
 
     predicted_target = theta.transpose().dot (test_feature_set) * std + mean
     test_target_set_denorm = test_target_set * std + mean
 
     print (test_target_set_denorm)
     print (predicted_target)
+
+    if metric == "MAE":
+        return numpy.absolute(test_target_set_denorm - predicted_target).mean ()
 
     return math.sqrt(((test_target_set_denorm - predicted_target) ** 2).mean ())
 
@@ -164,6 +167,8 @@ def normalEquation (filename, training_feature_set, training_target_set, test_fe
         norm_train_errors = []
         norm_test_errors = []
         norm_theta_errors = []
+        training_mean_absolute = []
+        test_mean_absolute = []
 
         ranges = list(range (10000, training_feature_set.shape [1], 2500))
         ranges.append (training_feature_set.shape [1] - 1)
@@ -197,11 +202,14 @@ def normalEquation (filename, training_feature_set, training_target_set, test_fe
             norm_test_errors.append (evaluateTheta (norm_test_feature_set, norm_test_target_set, theta_norm, mean, std))
             norm_theta_errors.append (math.sqrt(((theta_norm - lr_theta) ** 2).mean ()))
 
+            training_mean_absolute.append (evaluateTheta (norm_training_feature_set, norm_training_target_set, theta_norm, mean, std, metric = "MAE"))
+            test_mean_absolute.append (evaluateTheta (norm_test_feature_set, norm_test_target_set, theta_norm, mean, std, metric = "MAE"))
+
             print ("RMS between LR and norm. = " + str (math.sqrt(((theta_norm - lr_theta) ** 2).mean ())))
             print ("Training RMS = " + str (evaluateTheta (norm_training_feature_set, norm_training_target_set, theta_norm, mean, std)))
             print ("Testing RMS = " + str (evaluateTheta (norm_test_feature_set, norm_test_target_set, theta_norm, mean, std)))
 
-        norm_results = [norm_thetas, norm_sizes, norm_train_errors, norm_test_errors, norm_theta_errors]
+        norm_results = [norm_thetas, norm_sizes, norm_train_errors, norm_test_errors, norm_theta_errors, training_mean_absolute, test_mean_absolute]
         numpy.save (filename, norm_results)
 
     return norm_results

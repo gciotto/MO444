@@ -144,16 +144,16 @@ In this model, the linear regression method is used without any regularization f
 \begin{figure}
     \centering
     \includegraphics[width=0.9\columnwidth]{img/lr-gd.png}
-    \caption{RMS obtained for the training and test dataset at each iteration.}
+    \caption{Training and test errors obtained at each iteration.}
     \label{fig:lr-gd}
 \end{figure}
 
-Figure \ref{fig:lr-norm}, in turn, represents the results found through the use of the expression \ref{norm}. Two plots are shown: in the first one, we compare the errors obtained in the train and test datasets for many input set sizes ranging from 10000 to 31715, meanwhile in the second, we compare the parameter vectors \(\bm{\theta}\) obtained by the two methods described in this section. As expected, the RMS found by the normal equation, around 10580, was lower than the one found by the \textit {gradient descent} technique. The test error, in turn, also remained around 14570. It is also noted that there are some considerable differences between the vectors \(\bm{\theta}\) computed by each method, especially for intermediate sized data sets.
+Figure \ref{fig:lr-norm}, in turn, represents the results found through the use of the expression \ref{norm}. Two plots are shown: in the first one, we compare the errors obtained in the train and test datasets for many input set sizes ranging from 10000 to 31715, meanwhile in the second, we compare the parameter vectors \(\bm{\theta}\) obtained by the two methods described in this section. As expected, the RMS found by the normal equation, around 10580, was lower than the one found by the \textit {gradient descent} technique. The test error, in turn, also remained around 14570. It is also noted that there are some considerable differences between the vectors \(\bm{\theta}\) computed by each method, especially for intermediate sized data sets. In order to have a better comparison for quality among the final results, we use the mean absolute error (MAE). This metric tells the absolute average difference between the shares that a publication received and the one predicted. For the normal equations, the mean absolute errors for training and test are 3005 and 3183, respectively. This means that for a given publication, our model is predicting in average either 3000 more or less shares.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\columnwidth]{img/lr-norm.png}
-    \caption{RMS obtained for many training dataset sizes.}}
+    \caption{Training errors obtained for many dataset sizes.}}
     \label{fig:lr-norm}
 \end{figure}
 
@@ -164,13 +164,13 @@ Although we have not verified the \textit{overfitting} presence in the previous 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\columnwidth]{img/lr-comparation.png}
-    \caption{RMS obtained for the regularized models.}
+    \caption{Training and test errors obtained by the regularized models.}
     \label{fig:reg-comparison}
 \end{figure}
 
 \subsection{Reduction of features}
 
-Another attempt to minimize the error consisted of reducing the number of attributes used in the model. The attributes selection was done by computing the correlation of each of them to the output. Considering that the model is still linear, it is expected that more correlated variables follow the same pattern as the one observed at the output. The figure \ref{fig:correlation} represents only the 10 most correlated variables that were used for the proposed new model. It is worth mentioning that the highest correlation, corresponding to attribute 27 (\textit{Avg. Keyword (avg. Shares)}), is still a very low value, i.e, 0.125, indicating that no variable strongly influences the number of shares received by a publication. Figure \ref {fig:comparison-selection} compares the results found by the simple linear model and the model proposed in this subsection. A very slight increase in the testing error for the reduced model is observed at the iteration 10, indicating a slight overfitting presence. In addition, it is verified that both training and test errors of the reduced model converge faster than those computed by the simple model.
+Another attempt to minimize the error consisted of reducing the number of attributes used in the model. The attributes selection was done by computing the correlation of each of them to the output. Considering that the model is still linear, it is expected that more correlated variables follow the same pattern as the one observed at the output. The figure \ref{fig:correlation} represents only the 10 most correlated variables that were used for the proposed new model. It is worth mentioning that the highest correlation, corresponding to attribute 27 (\textit{Avg. Keyword (avg. Shares)}), is still a very low value, i.e, 0.125, indicating that no variable strongly influences the number of shares received by a publication. Figure \ref {fig:comparison-selection} compares the results found by the simple linear model and the model proposed in this subsection. A very slight increase in the testing error for the reduced model is observed at the iteration 10, indicating a slight overfitting presence. In addition, it is verified that both training and test errors of the reduced model converge faster than those computed by the simple model. Finally, the mean absolute errors verified by the normal equation for the training and test datasets were 3016 and 3195, respectively.
 
 \begin{figure}
     \centering
@@ -188,12 +188,12 @@ Another attempt to minimize the error consisted of reducing the number of attrib
 
 \subsection{Linear model with second order attributes}
 
-Another technique that can be used to reduce training and test errors is the addition of new attributes based on the existing ones to the simple model. In this case, we append to the traning and test input datasets all existing variables to the power of 2, obtaining the new relation \(Y_2 = Y + \theta_{N + 1}X_1 ^ 2 + \theta_{N + 2}X_2 ^ 2 + \ldots + \theta_{2N}X_N^2\). This new model is expected to be better adapted to the training and test data simultaneously, i.e, without overfitting. Note that the equations \ref{normal} and \ref{gd} do not need to be changed, given that the cost equation \ref {cost} remains linear in \(\bm{\theta}\). Figure \ref{fig:gd-second} has the result of the \textit {gradient descent} technique for this new model. Note that at iteration 5, the value of \(\alpha\) is modified, as described in section \ref{sec:ajuste}, since the error produced was higher than that found in the previous iteration. The training and test RMS errors after 100 iterations were, respectively, 13317 and 17089, higher than those verified for the simple linear model. The use of the \ref{normal} equation, in turn, resulted in errors around 10540 and 14580, very similar to those obtained by the same technique applied to the simple linear model.
+Another technique that can be used to reduce training and test errors is the addition of new attributes based on the existing ones to the simple model. In this case, we append to the traning and test input datasets all existing variables to the power of 2, obtaining the new relation \(Y_2 = Y + \theta_{N + 1}X_1 ^ 2 + \theta_{N + 2}X_2 ^ 2 + \ldots + \theta_{2N}X_N^2\). This new model is expected to be better adapted to the training and test data simultaneously, i.e, without overfitting. Note that the equations \ref{normal} and \ref{gd} do not need to be changed, given that the cost equation \ref {cost} remains linear in \(\bm{\theta}\). Figure \ref{fig:gd-second} has the result of the \textit {gradient descent} technique for this new model. Note that at iteration 5, the value of \(\alpha\) is modified, as described in section \ref{sec:ajuste}, since the error produced was higher than that found in the previous iteration. The training and test RMS errors after 100 iterations were, respectively, 13317 and 17089, higher than those verified for the simple linear model. The use of the \ref{normal} equation, in turn, resulted in errors around 10540 and 14580, very similar to those obtained by the same technique applied to the simple linear model. Finally, the mean absolute errors verified by the normal equation for the training and test datasets were 3001 and 3183, respectively.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.9\columnwidth]{img/lr-second-gd.png}
-    \caption{RMS errors obtained at each iteration by the model with second order attributes.}
+    \caption{Training and test errors obtained at each iteration by the model with second order attributes.}
     \label{fig:gd-second}
 \end{figure}
 
@@ -204,14 +204,14 @@ The last model tested in this report used second and third order attributes, obt
 \begin{figure}
     \centering
     \includegraphics[width=0.9\columnwidth]{img/lr-third-gd.png}
-    \caption{RMS errors obtained at each iteration by the model with second and third order attributes.}
+    \caption{Training and test errors obtained at each iteration by the model with second and third order attributes.}
     \label{fig:gd-third}
 \end{figure}
 
 %%% Add section %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions}
 
-Five linear models were proposed to predict the number of shares of a given Mashable social network publication. In almost all of them, the train and test RMS errors were around 10500 and 14500, respectively, indicating that the linear model is not able to accurately model the behavior of the users of this social network.
+Five linear models were proposed to predict the number of shares of a given Mashable social network publication. In almost all of them, the train and test mean absolute errors were around 3000 and 3180, respectively, indicating that the linear solution is not able to accurately model the behavior of the users of this social network. In other words, these errors mean that for any given publication, the proposed models are predicting almost 3000 more or less shares in average.
 
 %%% References %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 {\small

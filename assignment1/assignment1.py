@@ -175,7 +175,7 @@ matplotlib.pyplot.ylabel ("Root Mean Square Error")
 matplotlib.pyplot.xlabel ("# iteration")
 matplotlib.pyplot.legend(handles = [traning_plot, traning_plot_reg, test_plot_reg, traning_plot_4, test_plot_4])
 matplotlib.pyplot.title (r"$Y = \theta_0X_0 + \theta_1X_1 + \theta_2X_2 + ... + \theta_nX_n$")
-matplotlib.pyplot.suptitle (r"Regularized linear regression with gradient descent - comparison between different $\lambda$")
+matplotlib.pyplot.suptitle (r"Regularized linear regression with gradient descent\nComparison between different $\lambda$")
 
 matplotlib.pyplot.grid ()
 
