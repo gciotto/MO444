@@ -1,6 +1,8 @@
 import cv2
 import matplotlib.pyplot
 import os
+import skimage.io
+import skimage.restoration
 import threading
 
 class Classifier ():
@@ -16,24 +18,36 @@ class Classifier ():
 
             print (self.trainingAddr + "/" + subdir + "/" + file)
 
-            h = 5
+            h = 3
             templateWindowSize = 7
             searchWindowSize = 21
 
-            noisedImg = cv2.imread (self.trainingAddr + "/" + subdir + "/" + file)
+            w = 0.5
 
-            denoisedPath = "%s/%s/%s_%i_%i_%i_%i" % (self.trainingAddr, subdir, file, h, h, templateWindowSize, searchWindowSize)
+            noisedImg = skimage.img_as_float(skimage.io.imread (self.trainingAddr + "/" + subdir + "/" + file))
+            print (noisedImg)
+            # noiseLoadPath = "%s/%s/%s_noise_%i_%i_%i_%i" % (self.trainingAddr, subdir, file, h, h, templateWindowSize, searchWindowSize)
+            noiseLoadPath = "%s/%s/%s_noise_wavelet.jpg" % (self.trainingAddr, subdir, file)
+            denoiseLoadPath = "%s/%s/denoised_%s" % (self.trainingAddr, subdir, file)
+            
 
-            if os.path.isfile (denoisedPath):
-                denoisedImg = cv2.imread (denoisedPath)
+            if os.path.isfile (noiseLoadPath):
+                noise = cv2.imread (noiseLoadPath)
             else:
-                denoisedImg = cv2.fastNlMeansDenoisingColored (noisedImg, None, h, h, templateWindowSize , searchWindowSize)
-                cv2.imwrite (denoisedPath, denoisedImg)
+                # denoisedImg = cv2.fastNlMeansDenoisingColored (noisedImg, None, h, h, templateWindowSize , searchWindowSize)
+                denoisedImg = skimage.restoration.denoise_wavelet (noisedImg)
+                skimage.io.imsave (denoiseLoadPath, denoisedImg)
+                noise = noisedImg - denoisedImg
+                # skimage.io.imsave (noiseLoadPath, noise)
 
-            noise = noisedImg - denoisedImg
+                print (noisedImg.shape)
+                print (denoisedImg.shape)
+
+
 
     def extractFeatures (self):
 
-        for subdir in os.listdir (self.trainingAddr):
+        for i, subdir in enumerate (os.listdir (self.trainingAddr)[5:6]):
             t = threading.Thread (target = self.extractFeatureThread, args = (subdir,))
             t.start ()
+
