@@ -1,6 +1,8 @@
-import cv2
 import matplotlib.pyplot
+import numpy
 import os
+import pywt
+import scipy.stats
 import skimage.io
 import skimage.restoration
 import threading
@@ -18,32 +20,48 @@ class Classifier ():
 
             print (self.trainingAddr + "/" + subdir + "/" + file)
 
-            h = 3
-            templateWindowSize = 7
-            searchWindowSize = 21
+            noisedImage = skimage.img_as_float(skimage.io.imread (self.trainingAddr + "/" + subdir + "/" + file))
 
-            w = 0.5
-
-            noisedImg = skimage.img_as_float(skimage.io.imread (self.trainingAddr + "/" + subdir + "/" + file))
-            print (noisedImg)
-            # noiseLoadPath = "%s/%s/%s_noise_%i_%i_%i_%i" % (self.trainingAddr, subdir, file, h, h, templateWindowSize, searchWindowSize)
-            noiseLoadPath = "%s/%s/%s_noise_wavelet.jpg" % (self.trainingAddr, subdir, file)
+            noiseLoadPath = "%s/%s/fingerprint_%s.jpg" % (self.trainingAddr, subdir, file)
             denoiseLoadPath = "%s/%s/denoised_%s" % (self.trainingAddr, subdir, file)
             
-
             if os.path.isfile (noiseLoadPath):
-                noise = cv2.imread (noiseLoadPath)
+                noise = skimage.img_as_float (skimage.io.imread (noiseLoadPath))
             else:
-                # denoisedImg = cv2.fastNlMeansDenoisingColored (noisedImg, None, h, h, templateWindowSize , searchWindowSize)
-                denoisedImg = skimage.restoration.denoise_wavelet (noisedImg)
-                skimage.io.imsave (denoiseLoadPath, denoisedImg)
-                noise = noisedImg - denoisedImg
+
+                scales = 4
+                features = numpy.array ([])
+
+                # Apply wavelet trasform
+                for colorChannel in range (0, 3):
+                    # wvt_decomposition = [cAn, (cHn, cVn, cDn), … (cH1, cV1, cD1)]
+                    wvt_decomposition = pywt.wavedec2 (data = noisedImage [:,:,colorChannel], wavelet = "db8", level = scales)
+
+                    # scale = (cHn, cVn, cDn), … (cH1, cV1, cD1)
+                    for scale in wvt_decomposition [1:]:
+                        for direction in range (len (scale)):
+                            # Compute mean, variance, skewness and kurtosis
+                            mean = numpy.mean (scale [direction])
+                            print ("Mean " + str (mean))
+                            variation = numpy.var (scale [direction])
+                            print ("Variance " + str (variation))
+                            skewness = scipy.stats.skew (numpy.histogram (scale [direction])[0])
+                            print ("Skewness " + str(skewness))
+                            kurtosis = scipy.stats.kurtosis (numpy.histogram (scale [direction])[0])
+                            print ("Kurtosis " + str(kurtosis))
+
+                            features = numpy.append (features, [mean, variation, skewness, kurtosis])
+
+                print (features.shape)
+                print (features)
+
+                # denoisedImg = skimage.restoration.denoise_wavelet (noisedImg)
+                # skimage.io.imsave (denoiseLoadPath, denoisedImg)
+                # noise = noisedImg - denoisedImg
                 # skimage.io.imsave (noiseLoadPath, noise)
 
-                print (noisedImg.shape)
-                print (denoisedImg.shape)
-
-
+                # print (noisedImg.shape)
+                # print (denoisedImg.shape)
 
     def extractFeatures (self):
 
