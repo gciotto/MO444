@@ -5,6 +5,7 @@ import pywt
 import scipy.ndimage
 import scipy.signal
 import scipy.stats
+import skimage.feature
 import skimage.io
 import skimage.restoration
 import threading
@@ -18,18 +19,18 @@ class Classifier ():
 
     def extractFeatureThread (self, subdir):
 
-        for file in os.listdir (self.trainingAddr + "/" + subdir)[0:1]:
+        for file in os.listdir (self.trainingAddr + "/" + subdir)[0:10]:
 
             print (self.trainingAddr + "/" + subdir + "/" + file)
 
-            noisedImage = skimage.img_as_float(skimage.io.imread (self.trainingAddr + "/" + subdir + "/" + file))
+            noisedImageInt = skimage.io.imread (self.trainingAddr + "/" + subdir + "/" + file)
+            noisedImage = skimage.img_as_float(noisedImageInt)
 
             noiseLoadPath = "%s/%s/fingerprint_%s" % (self.trainingAddr, subdir, file)
             denoiseLoadPath = "%s/%s/denoised_%s" % (self.trainingAddr, subdir, file)
+            featureLoadPath = "%s/%s/%s" % ("features", subdir, file)
 
-            if os.path.isfile (noiseLoadPath):
-                noise = skimage.img_as_float (skimage.io.imread (noiseLoadPath))
-            else:
+            if not os.path.isfile (featureLoadPath):
 
                 scales = 4
                 features = numpy.array ([])
@@ -46,17 +47,17 @@ class Classifier ():
                     denoised_wvt = [wvt_decomposition[0]]
                     for scale in wvt_decomposition [1:]:
                         filters = ()
-                        print (len (scale))
+                        # print (len (scale))
                         for direction in range (len (scale)):
                             # Compute mean, variance, skewness and kurtosis - Higher-order wavelet features - Source Camera Identification Forensics Based on Wavelet Features
                             mean = numpy.mean (scale [direction])
-                            print ("Mean " + str (mean))
+                            # print ("Mean " + str (mean))
                             variation = numpy.var (scale [direction])
-                            print ("Variance " + str (variation))
+                            # print ("Variance " + str (variation))
                             skewness = scipy.stats.skew (numpy.histogram (scale [direction])[0])
-                            print ("Skewness " + str(skewness))
+                            # print ("Skewness " + str(skewness))
                             kurtosis = scipy.stats.kurtosis (numpy.histogram (scale [direction])[0])
-                            print ("Kurtosis " + str(kurtosis))
+                            # print ("Kurtosis " + str(kurtosis))
 
                             features = numpy.append (features, [mean, variation, skewness, kurtosis])
 
@@ -67,15 +68,14 @@ class Classifier ():
                             win_mean = scipy.ndimage.uniform_filter(scale [direction], (win_rows, win_cols))
                             win_sqr_mean = scipy.ndimage.uniform_filter(scale [direction]**2, (win_rows, win_cols))
                             variance = win_sqr_mean - win_mean**2
-                            # variance = scipy.ndimage.generic_filter (scale [direction], numpy.var, size = (5,5))
                             sigma = 0.001
                             wiener = scale [direction] * (variance**2)/(variance**2 + sigma**2)
                             filters = filters + (wiener,)
 
-                        print (len(filters))
+                        # print (len(filters))
                         denoised_wvt.append (filters)
 
-                    print (len(denoised_wvt))
+                    # print (len(denoised_wvt))
                     denoisedImage [:,:, colorChannel] = pywt.waverec2 (denoised_wvt, wavelet = "db8")
 
                 denoisedImage = numpy.maximum (-1, denoisedImage)
@@ -91,7 +91,7 @@ class Classifier ():
                 # skimage.io.imsave (noiseLoadPath, noise)
                 # skimage.io.imsave (denoiseLoadPath, denoisedImage)
 
-                print (features.shape)
+                # print (features.shape)
 
                 # Last features
                 for colorChannel in range (0, 3):
@@ -102,12 +102,17 @@ class Classifier ():
                             for n in range (1, 10):
                                 features = numpy.append (features, [scipy.stats.moment (scale [direction], moment = n, axis = None)])
 
-                print (features.shape)
-                print (features)
+                    # Co-ocurrence matrix of fingerprint image
+                    glcm = skimage.feature.greycomatrix(skimage.img_as_ubyte(noise[:,:,colorChannel]), [1], [0, numpy.pi/2, numpy.pi, 3*numpy.pi/2], normed=True)
+                    for prop in ["contrast", "dissimilarity", "homogeneity", "energy", "correlation"]:
+                        p = skimage.feature.greycoprops (glcm, prop = prop)
+                        features = numpy.append (features, p[0])
+
+                numpy.save (featureLoadPath, features)
 
     def extractFeatures (self):
 
         print (os.listdir (self.trainingAddr))
-        for i, subdir in enumerate (os.listdir (self.trainingAddr)[3:4]):
+        for i, subdir in enumerate (os.listdir (self.trainingAddr)[1:3]):
             t = threading.Thread (target = self.extractFeatureThread, args = (subdir,))
             t.start ()
