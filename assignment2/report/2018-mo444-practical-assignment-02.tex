@@ -11,103 +11,73 @@
 \usepackage{amssymb}
 \usepackage{color}
 \usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
-\input{pics/abaco}
 
 \cvprfinalcopy % *** Uncomment this line for the final submission
 \def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
 \ifcvprfinal\pagestyle{empty}\fi
 
-
 %%% Report beginning %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 
 %%% Title and authors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title {Predizendo o modelo da câmera de um foto a partir de técnicas de aprendizado de maáquina}
+\title {Predizendo o modelo da câmera de uma fotografia a partir de técnicas de aprendizado de máquina}
 \author{Gustavo Ciotto Pinton, RA117136\thanks{Is with the Institute of Computing, University of Campinas (Unicamp). \textbf{Contact}: \tt\small{gustavociotto@gmail.com}}}
 
 %%% Abstract %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \maketitle
 \begin{abstract}
-São propostos neste documento dois métodos de classificação, baseados em aprendizado de máquina, capazes de determinar, a partir de uma foto, o modelo da câmera que a gerou. No total, 10 modelos de câmeras distintas, mas de mesmos fabricantes, são utilizados neste problema. O primeiro método, baseado na técnica de regressão logística, consiste em separar as 10 classes em grupos binários de maneira a testar sempre um dos modelos contra os demais, enquanto que o segundo, baseado em redes neurais, busca diretamente a classe de determinada imagem, sem quaisquer divisão binária dos grupos. Além disso, neste artigo, estão descritos os atributos recuperados das imagens e os parâmetros configurados em cada um dos métodos, bem como a sua influência no resultado final.
+São propostos neste documento dois métodos de classificação baseados em aprendizado de máquina e capazes de determinar, a partir de uma foto, o modelo da câmera que a gerou. No total, 10 modelos de câmeras distintas, mas de mesmos fabricantes, são utilizados neste problema. O primeiro, baseado na técnica de regressão logística, consiste em separar as 10 classes em grupos binários de maneira a testar sempre um dos modelos contra os demais, enquanto que o segundo, baseado em redes neurais, busca diretamente a classe de determinada imagem, sem quaisquer divisão binária dos grupos. Além disso, neste artigo, estão descritos os atributos recuperados das imagens e os parâmetros configurados em cada um dos métodos, bem como a sua influência no resultado final. Por fim, são apresentados os resultados de cada uma das técnica e o score obtido para o problema na plataforma Kaggle.
 \end{abstract}
 
 %%% Introduction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introdução}
 \label{intro}
 
-A técnica de regressão logistíca, ao contrário do método de regressão linear explorado na última atividade que tem como objetivo modelar os dados de dados em um equação linear, busca classificar os dados de entrada em dois grupos discretos, comumente denominados \(0\) e \(1\). 
-
-consiste em uma técnica simples cujo objetivo é relacionar um conjunto de dados de entrada com os de saída através do uso de uma equação linear \(Y = \theta_0 + \theta_1X_1 + \theta_2X_2 + \ldots + \theta_NX_N\), em que \(Y\), \(X_i\) e \(\theta_i\) representam, respectivamente, a saída gerada pelo modelo a partir de um conjunto de atributos e os coeficientes da equação. A equação anterior é utilizada apenas para uma amostra singular, porém, como visto em aula, o principal aspecto que garante a qualidade de resultados obtidos por métodos de aprendizado de máquina é o grande volume de dados. Tendo isso em vista, um conjunto de \(M\) amostras de entrada descritas por \(N\) atributos é representado pela matriz \(\bm{x}_{N+1\times M}\). Da mesma maneira, os coeficientes da equação são representados pelo vetor \(\bm{\theta}\) de \(N+1\) elementos e a saída, pelo vetor \(\bm{y}\) de \(M\) valores, de forma a obter a equação vetorial \ref{lr}, logo abaixo.
+A técnica de regressão logistíca, ao contrário do método de regressão linear cujo objetivo é adequar os dados a uma equação linear, busca classificar os dados de entrada em dois grupos discretos, comumente denominados \(0\) e \(1\). Para tal, define-se a matriz \(\bm{x}\) de dimensões \(N + 1 \times M\)  contendo \(M\) entradas descritas por \(N + 1\) atributos (contando evidentemente um elemento de \textit{bias}), o vetor \(\bm{\theta}\) representando o peso que cada atributo terá no modelo e a uma função \(g\left(\bm{\theta}, \bm{x}^{(i)}\right)\) cujo conjunto imagem é o intervalo \([0,1]\). Esta última é responsável por predizer a classe \(\bm{\hat{y}}^{(i)}\) de cada entrada \(\bm{x}^{(i)}\), tendo em vista que valores \(\bm{\hat{y}}^{(i)}\) mais próximos de 0 indicarão que determinada entrada tem mais chance de pertencer à classe 0 e vice-versa. A função \(g\), a princípio, pode assumir qualquer equação desde que sua imagem fique entre 0 e 1. Para este documento, tal função assumirá a forma sigmoidal, conforme equação \ref{eq:sig}.
 
 \begin{equation}
-\label {lr}
-\bm{y} = \bm{\theta}^T\bm{x}
+\label {eq:sig}
+\bm{\hat{y}}^{(i)} = g \left(\bm{\theta},\bm{x}^{(i)}\right) = \frac {1}{1 + e^{-\bm{\theta}^T\bm{x}^{(i)}}}
 \end{equation}
 
-A determinação das componentes de \(\bm{\theta}\) é realizada a partir da minimização da função de custo \(J(\bm{\theta}, \bm{x})\), descrita pela equação \ref{cost}, em que \(\bm{x}_ i\) corresponde à i-ésima amostra e \(t_ i\) ao \textit{target} que deseja-se atingir.
+Neste caso, se \(\theta^T\bm{x}^{(i)}\) é grande, então \(e^{-\theta^T\bm{x}^{(i)}}\) tende a zero e a classe atribuida à entrada \(i\) será 1. Em oposição, se \(\theta^T\bm{x}^{(i)}\) é muito negativo, a função tenderá a 0, assim como a classe escolhida.
+
+Assim como quase toda técnica de aprendizado de máquina, a determinação dos valores do vetor \(\bm{\theta}\) envolve a minimização de uma função de custo \(J(\bm{\theta}, \bm{x})\), descrita pela equação \ref{eq:cost}, a partir de um conjunto de entradas \(\bm{x}^{(i)}\) de saídas \(\bm{y}^{(i)}\) conhecidas.
 
 \begin{equation}
-\label {cost}
-J(\bm{\theta}, \bm{x}) = \frac{1}{2M} \displaystyle\sum_{i=1}^{M} \left(\bm{\theta}^T\bm{x}^{(i)} - \bm{t}^{(i)}\right)^2
+\begin{split}
+\label {eq:cost}
+J(\bm{\theta}, \bm{x}) = -\frac{1}{M} \displaystyle\sum_{i=1}^{M} & \left[ \bm{y}^{(i)}\log \left( \bm{\hat{y}}^{(i)} \right) + \ldots \right. \\
+& \left.  + \left(1 -\bm{y}^{(i)}\right)\log \left(1 - \bm{\hat{y}}^{(i)} \right) \right] \\
+\end{split}
 \end{equation}
 
-Os dados utilizados para a minimização \(\bm{x}\) e \(\bm{t}^{(i)}\) pertencem a um conjunto chamado \textbf{conjunto de treinamento}, enquanto que a validação dos parâmetros obtidos ocorre em um conjunto que recebe este mesmo nome. Um regra geral é separar 80\% dos dados disponíveis para treinamento e o restante, 20\%, para testes e validação.
+Como visto em aula, a função \(J(\bm{\theta}, \bm{x})\) é convexa e, portanto, não possui mínimos locais além do global e sua minimização pode ser realizada também através do método de \textit {gradient descent}, explorada na última atividade. Os dados utilizados para a minimização \(\bm{x}^{(i)}\) e \(\bm{y}^{(i)}\) pertencem a um conjunto denominado \textbf{conjunto de treinamento}, enquanto que a validação dos parâmetros obtidos ocorre em um conjunto que recebe este mesmo nome. Um regra geral é separar 80\% dos dados disponíveis para treinamento e o restante, 20\%, para testes e validação.
 
-A função de custo \(J(\bm{\theta}, \bm{x})\) possui a importante propriedade de ser \textbf{convexa} \cite{Bishop:2006:PRM:1162264}. Isso garante que ela não possui mínimos locais, exceto pelo global. Deste modo, dois métodos de minimização podem ser utilizados. O primeiro, chamado de \textbf{equação normal}, permite obter o \(\bm{\theta}\) ótimo a partir de uma única expressão, representada em \ref{normal}. Observa-se rapidamente que o ponto negativo desta abordagem é o cálculo da matriz inversa, cuja complexidade assimptótica de computação é \(\Theta(n^3)\), conforme visto em aula. Para a matrix \(\bm{x}^T\bm{x}\) de dimensão \(N+1 \times N+1\), portanto, o número de atributos \(N\) pode representar um impedimento para o uso desta técnica.
-
-\begin{equation}
-\label {normal}
-\bm{\theta} = \left(\bm{x}^T\bm{x}\right)^{-1} \bm{x}^T \bm{t}
-\end{equation}
-
-O segundo método, chamado de \textbf{gradient descent}, é iterativo e não requer o cálculo de nenhuma matriz inversa. Derivando-se parcialmente a equação \ref{cost} em relação a \(\bm{\theta}_j\), obtém-se o coeficiente linear e portanto a direção que devemos tomar para nos aproximar do mínimo global. Repetindo o raciocínio para todos os parâmetros \(\bm{\theta}_j\), obtém-se à operação \ref{gd} que deve ser aplicada a cada um deles a cada iteração. Ressalta-se que \(\bm{x}_1 = 1\) para todo \(i\).
+Derivando-se parcialmente a equação \ref{eq:cost} em relação a \(\bm{\theta}_j\), obtém-se o coeficiente linear e portanto a direção que devemos tomar para nos aproximar do mínimo global. Repetindo o raciocínio para todos os parâmetros \(\bm{\theta}_j\), obtém-se à operação \ref{gd} que deve ser aplicada a cada um deles a cada iteração. Observa-se que, apesar de que o cálculo de \ref {eq:sig} ser totalmente diferente da aproximação realizada pelo modelo linear, isto é, \(\bm{\hat{y}}^{(i)}_{lr} = \bm{\theta}^T\bm{x}^{(i)}\), obtemos exatamente a mesma equação para cada iteração, conforme equação \ref{gd}. Assim como explorado na atividade passada, \(\alpha\) é chamado de \textit{learning rate} e controla a velocidade de convergência ao mínimo global.
 
 \begin{equation}
 \label {gd}
-\bm{\theta}_j = \bm{\theta}_j - \alpha\frac{\partial J}{\partial \bm{\theta}_j } = \bm{\theta}_j - \frac{\alpha}{M} \displaystyle\sum_{i=1}^{M} \left(\bm{\theta}^T\bm{x}^{(i)} - \bm{t}^{(i)}\right)\bm{x}_j^{(i)}
+\bm{\theta}_j = \bm{\theta}_j - \alpha\frac{\partial J}{\partial \bm{\theta}_j } = \bm{\theta}_j - \frac{\alpha}{M} \displaystyle\sum_{i=1}^{M} \left(\bm{\hat{y}}^{(i)} - \bm{y}^{(i)}\right)\bm{x}_j^{(i)}
 \end{equation}
 
-A equação \ref{gd} introduz o parâmetro \(\alpha\), chamado de \textit{learning rate}. Tal parâmetro controla a velocidade de convergência ao mínimo global, isto é, quanto maior o seu valor mais rapidamente ele é atingido. Por outro lado, valores muito grandes produzirão um efeito denominado \textit {overshooting}, isto é, a solução encontrada sempre ficará \textit{balançando} ao redor do mínimo sem nunca atingí-lo. Nas próximas seções, o autor explica a estratégia para a definição desta grandeza para o problema deste relatório.
+É importante observar que, para problemas com mais de duas classes, é necessário adotar estratégias para o uso da regressão logística, tendo em vista que ela é capaz de modelar apenas problemas \textit {binários}. Sendo assim, exploramos duas estratégias durante as aulas. A primeira, chamada de \textit{one vs. all} consiste em obter \(n\) modelos com \(n\) igual o número de classes e, para cada um, calcular \(\bm{\hat{y}}^{(i)}_j\). A classe \(j\) escolhida será aquela com maior \(\bm{\hat{y}}^{(i)}_j\). Na segunda estratégia, denominada \textit{many vs. many}, seleciona-se aleatoriamente grupos de classes e calcula-se um preditor para cada um deles. A determinação da classe ocorre da mesma maneira, isto é, a partir da verificação da maior probalidade. Para este problema, entretanto, escolhe-se a primeira estratégia.
 
-Tendo visto toda teoria por trás da regressão linear, podemos aplicá-la a dados reais. Neste relatório, usamos dados reais \cite{database} da rede social \textit{Mashable}, que visam relacionar uma série de atributos de uma determinada publicação com o número de \textit{shares} que ela recebeu. Em outras palavras, busca-se encontrar uma relação linear entre o número de \textit{shares} recebidos com os atributos de uma publicação. No total, 31715 dados foram usados para treinamento dos modelos e 7929 para teste e validação.
+Tendo visto duas ferramentas de classificação, podemos aplicá-las a dados reais. Neste relatório, usamos dados de uma competição publicada na plataforma \textit{Kaggle}, em que os competitores foram desafiados a determinar o modelo da câmera que gerou determinada fotografia. Em outras palavras, busca-se dividir o conjunto de entrada em 10 classes distintas, cada uma representando um modelo de câmera distinto. No total, 275 fotografias de cada modelo foram disponibilizados para treinamento dos classificadores. Nas próximas seções, serão discutidos o processo de aquisição de atributos das imagens, o processo de treinamento e os resultados obtidos.
 
 %%% Add section %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Atividades}
 
 As próximas subseções visam explicar as escolhas dos diversos parâmetros adotados pelo autor.
 
-\subsection{Ajuste do learning rate}
+\subsection{Cálculo dos atributos}
+
+\subsection{Ajuste dos parâmetros da regressão logística}
 \label{sec:ajuste}
-Conforme mencionado na seção \ref{intro}, o parâmetro \textit{learning rate} controla a velocidade de convergência ao mínimo global da função de custo. Tendo em vista as questões levantadas nesta mesma seção, adota-se um valor \(\alpha\) inicial igual a 0.5, modificando-o em apenas duas situações:
 
-\begin{itemize}
-	\item Quando o erro da iteração \(k\) é superior aquele da iteração \(k -1\). Neste caso, conclui-se que a solução encontrada foi pior e, portanto, devemos diminuir a velocidade de convergência.
-	\item A variação do erro entre as iterações \(k\) e \(k -1\), isto é, \(\frac{R_{k - 1} - R_k}{R_k}\), foi inferior a uma porcentagem \(\Delta = 0.5\%\). Neste caso, deseja-se eliminar os efeitos de \textit{overshooting} e aproximar o melhor possível do mínimo global. Denota-se de \(R_k\), dado pela fórmula \ref {rms}, o \textit{root-mean-square error} obtido na iteração \(k\):
-	\begin {equation}
-	\label{rms}
-	R_k = \sqrt{\frac {\sum_{i=1}^{M} \left(\bm{\theta}_k^T\bm{x}^{(i)} - \bm{t}^{(i)}\right)^2}{M}}
-	\end{equation}
-\end{itemize}
+alpha e regularização
 
-Nestes dois casos, o valor de \(\alpha\) é diminuído pela metade.
-
-\subsection {Ajuste das variáveis discretas}
-
-A descrição dos atributos de cada uma das entradas revelou a presença de algumas variáveis discretas. Dois grupos foram identificados: um com variáveis do tipo \textit{a publicação ocorreu na segunda-feira?}, \textit{a publicação ocorreu na terça-feira?} e assim por diante, e outro com atributos semelhantes a \textit{o canal é de entretenimento?}. Antes de utilizá-las ou não nos modelos propostos a seguir, é preciso verificar se tais variáveis são \textbf {ortogonais} entre si, isto é, se a distância entre elas consideradas duas a duas é sempre a mesma. Levando-se em consideração que as variáveis de ambos os grupos nunca podem ser setadas simultaneamente (uma publicação não pode ocorrer na segunda e na terça e ela não pode pertencer a dois canais ao mesmo tempo, por exemplo), observa-se a propriedade de \textbf {ortogonalidade} e, portanto, podemos utilizá-las sem quaisquer modificações.
-
-\subsection {Normalização dos dados de entrada e de saída}
-
-A normalização dos dados antes do treinamento previne que os valores \(\bm{\theta}_j\) sejam extremamente pequenos ou grandes de forma a
-causar instabilidades ou interferir na velocidade de convergência do modelo. Dentre as muitas maneiras de normalização que podem ser aplicadas, escolhemos para esta atividade aquela da equação \ref{norm}. Neste caso, são calculados a média \(\mu_j\) e o desvio padrão \(\sigma_j\) de cada \textit{feature} \(\bm {x'}_j\) sobre todas as amostras de treinamento e depois é aplicada a expressão \ref{norm}.
-
-\begin {equation}
-\label {norm}
-\bm {x'}_j = \frac {\bm{x}_j - \mu_j}{\sigma_j}
-\end{equation}
-
-Vale lembrar que os valores \(\mu_j\) e \(\sigma_j\) devem ser amarzenados para serem utilizados posteriormente no conjunto de teste e em qualquer outra entrada a ser aplicada no modelo.
-
-\subsection{Regularização}
+\subsection {Arquitetura da rede neural}
 
 \label{sec:reg}
 
